@@ -1,0 +1,51 @@
+server:
+  port: 8080
+
+
+# Через H2
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+# QAuth2
+#  security:
+#    oauth2:
+#      resource server:
+#        jwt:
+#          issuer-uri: http://localhost:8080/auth/realms/demo
+
+# Если через Postgres
+#spring:
+#  datasource:
+#    url: jdbc:postgresql://localhost:5432/reminder_db
+#    username: postgres
+#    password: password
+
+  jpa:
+    hibernate:
+      ddl-auto: update #
+    show-sql: true
+
+#   Почта
+  mail:
+    host: smtp.mailtrap.io
+    port: 2525
+    username: 1111
+    password: 1111
+  liquibase:
+    change-log: classpath:db/changelog/changelog-master.yaml
+
+# Swagger
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+  show-actuator: true
