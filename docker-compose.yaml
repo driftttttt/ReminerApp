@@ -1,0 +1,35 @@
+version: '3.8'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: demo-app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/reminder_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      TZ: Europe/Moscow # для корректной настройки часового пояса
+    volumes:
+      - /etc/localtime:/etc/localtime:ro # локальное время
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    container_name: demo-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: reminder_db
+      TZ: Europe/Moscow # для корректной настройки часового пояса
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro # локальное время
+    ports:
+      - "5432:5432"
+
+volumes:
+  db_data:

@@ -15,3 +15,5 @@ public interface ReminderRepository extends JpaRepository<Reminder, Long>, JpaSp
     @Cacheable("reminders")
     List<Reminder> findAll();
 }
+
+
