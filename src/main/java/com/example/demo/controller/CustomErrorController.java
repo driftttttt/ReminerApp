@@ -15,7 +15,11 @@ import java.util.Map;
 
 @Controller
 public class CustomErrorController implements ErrorController {
-    // Вывод ошибок вместо Whitelabel
+    /**\
+     * Вместо Whitelabel выводим ошибку с кодом
+     * @param request
+     * @return Ошибка + код в формате JSON
+     */
     @RequestMapping("/error")
     public ResponseEntity<Object> handleError(HttpServletRequest request) {
         Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);

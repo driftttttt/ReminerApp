@@ -6,6 +6,8 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,28 +20,26 @@ import org.springframework.security.web.SecurityFilterChain;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
+@Profile("!test")
 public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable()) // Отключаем CSRF
+        http.securityMatcher("/api/**") // Только для запросов типа /api/
+                .csrf(csrf -> csrf.disable())
                 .headers(headers -> headers.frameOptions(frame -> frame.disable())) // Для H2 Console
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/h2-console/**").permitAll() // Разрешаем доступ к H2 Console
+                        .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/api/v1/reminder/create", "/api/v1/reminder/delete/**").authenticated()
                         .anyRequest().permitAll()
                 )
-                .httpBasic(withDefaults()); // Включаем HTTP Basic Authentication
+                .httpBasic(withDefaults()); // HTTP Basic Authentication
 
         return http.build();
     }
 
-
-
     @Bean
     public UserDetailsService userDetailsService() {
-        // Создаем пользователей в памяти
         UserDetails user = User.builder()
                 .username("testuser")
                 .password(passwordEncoder().encode("password"))
@@ -70,6 +70,4 @@ public class SecurityConfig {
                                 .type(SecurityScheme.Type.HTTP)
                                 .scheme("basic")));
     }
-
 }
-

@@ -2,6 +2,8 @@ package com.example.demo.scheduler;
 
 import com.example.demo.entity.Reminder;
 import com.example.demo.repository.ReminderRepository;
+import com.example.demo.service.TelegramNotificationService;
+import com.example.demo.service.EmailNotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -13,37 +15,57 @@ import java.util.List;
 public class ReminderScheduler {
 
     private final ReminderRepository reminderRepository;
+    private final TelegramNotificationService telegramNotificationService;
+    private final EmailNotificationService emailNotificationService;
 
     @Autowired
-    public ReminderScheduler(ReminderRepository reminderRepository) {
+    public ReminderScheduler(ReminderRepository reminderRepository,
+                             TelegramNotificationService telegramNotificationService,
+                             EmailNotificationService emailNotificationService) {
         this.reminderRepository = reminderRepository;
+        this.telegramNotificationService = telegramNotificationService;
+        this.emailNotificationService = emailNotificationService;
     }
 
-    // Проверка раз в 10сек
+    /**
+     * <ul>
+     *     <li>Проверка напоминаний раз в 10 сек</li>
+     *     <li>Получаем напоминания, которые нужно отправить</li>
+     *     <li>Обрабатываем каждое напоминание</li>
+     *     <li>Отправка уведомления в Telegram</li>
+     *     <li>Помечаем как отправленное</li>
+     * </ul>
+     */
     @Scheduled(fixedRate = 10000)
     public void sendReminders() {
-        //System.out.println("Проверка напоминаний: " + LocalDateTime.now());
-
-
-        // Получаем напоминания
         List<Reminder> reminders = reminderRepository.findAll().stream()
-                .filter(reminder -> reminder.getRemind().isBefore(LocalDateTime.now()) && !reminder.isSent()) //Наступило время + не помечены отправленными
+                .filter(reminder -> reminder.getRemind().isBefore(LocalDateTime.now()) && !reminder.isSent())
                 .toList();
 
-        // Уведоление
         for (Reminder reminder : reminders) {
-            System.out.println("НОВОЕ УВЕДОМЛЕНИЕ! ️");
-            System.out.println("Заголовок: " + reminder.getTitle());
-            System.out.println("Описание: " + reminder.getDescription());
-            System.out.println("Время: " + reminder.getRemind());
+            String message = "Напоминание!\n" +
+                    "Заголовок: " + reminder.getTitle() + "\n" +
+                    "Описание: " + reminder.getDescription() + "\n" +
+                    "Время: " + reminder.getRemind();
 
-            // email
+            try {
+                telegramNotificationService.sendNotification(message);
+            } catch (Exception e) {
+                System.err.println("Ошибка отправки уведомления в Telegram: " + e.getMessage());
+            }
 
-            //Почем как отправленное
+            try {
+                emailNotificationService.sendEmail(
+                        reminder.getUser().getEmail(),
+                        "Напоминание: " + reminder.getTitle(),
+                        message
+                );
+            } catch (Exception e) {
+                System.err.println("Ошибка отправки уведомления на Email: " + e.getMessage());
+            }
+
             reminder.setSent(true);
             reminderRepository.save(reminder);
         }
-
-        //System.out.println("Проверка завершена.\n");
     }
 }

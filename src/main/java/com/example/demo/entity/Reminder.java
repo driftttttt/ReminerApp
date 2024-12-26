@@ -1,80 +1,51 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-
 @Entity
 @Table(name = "reminders")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Reminder {
+    /**
+     * Уникальный идентификатор
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; //Уникальный идентификатор
+    private Long id;
 
+    /**
+     * Краткое описание
+     */
     @Column(nullable = false)
-    private String title; //Краткое описание
+    private String title;
 
+    /**
+     * Полное описание
+     */
     @Column(nullable = false, length = 4096)
-    private String description; //Полное описание
+    private String description;
 
+    /**
+     * Дата и время
+     */
     @Column(nullable = false)
-    private LocalDateTime remind; //Дата и время напоминания в формате ISO
+    private LocalDateTime remind;
 
+    /**
+     * Идентификатор
+     */
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User user; // Идентификатор пользователя
+    private User user;
 
-    public boolean isSent() {
-        return sent;
-    }
-
-    public void setSent(boolean sent) {
-        this.sent = sent;
-    }
-
-    private boolean sent =  false; //Было ли уведомление по напоминанию
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-
-
-    public LocalDateTime getRemind() {
-        return remind;
-    }
-
-    public void setRemind(LocalDateTime remind) {
-        this.remind = remind;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
+    private boolean sent = false;
 
 }
